@@ -71,7 +71,19 @@ sim_mu0
 
 ### Simulations 5000 times for mu = 1,2,3,4,5,6
 ```{r}
+sim_mus = tibble(mu = c(1,2,3,4,5,6)) %>%
+  mutate( 
+    output = map(.x = mu, ~rerun(5000, sim_ttest(.x))), 
+    estimate= map(output_list, bind_rows)) %>%
+  select(mu, estimate_df) %>%
+  unnest(estimate_df)
+  
 
+sim_mus
 ```
 
+### Make plots
+```{r}
+
+```
 
