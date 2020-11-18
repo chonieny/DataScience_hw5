@@ -1,0 +1,41 @@
+---
+title: "Homework 5"
+output: github_document
+author: Na Yun Cho
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Problem 2 
+
+```{r}
+df = tibble(files = list.files(path = "./data", full.names = TRUE)) %>%
+  mutate(file_contents = map(.x = files, ~read_csv(.x))) %>%
+  unnest(file_contents) %>%
+  pivot_longer(
+    week_1 : week_8,
+    names_to = "week",
+    names_prefix = "week_",
+    values_to = "observations"
+  ) %>%
+  mutate(files = str_replace(files, ".csv$", "")) %>%
+  mutate(files = str_replace(files, "exp", "experimental"),
+         files = str_replace(files, "con", "control")) %>%
+  separate(files, into = c("arms_old", "id"), sep = "\\_") %>%
+  separate(arms_old, into = c("dot", "data", "arm"), sep = "/") %>%
+  select(arm, id, week, observations) %>%
+  mutate(arm = as.factor(arm), id = as.numeric(id), week = as.numeric(week))
+  
+df
+```
+
+```{r}
+plot = df %>%
+  ggplot(aes(x = week, y = observations, group = interaction(id, arm), color = arm)) +
+  geom_line() + labs(title = "Observations on each subject in experimental and control arms", x = "week", y = "observations")
+
+plot
+```
+
