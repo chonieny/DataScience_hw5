@@ -80,6 +80,7 @@ sim_mus = tibble(mu = c(1,2,3,4,5,6)) %>%
 ```
 
 ### Make plots
+
 ##### (1) step 1 of making plot 1
 ```{r}
 test_power = 
@@ -110,6 +111,44 @@ test_power
 test_power %>% ggplot(aes(x = mu, y = power)) +
   geom_point() +
   geom_smooth() + 
-  labs()
+  labs(title = "Association between Effect Size and Power", x = "true value of mu", y ="power")
+```
+Comment : The plot shows that greater the effect size, greater the power of a test. As the effect size increases from 1 to 6, the power of the test increases as well. When the effect size is around 4, the power of the test also reaches its maximum value of 1 and plataeus there. 
+
+##### (3) step 1 of making plot 2
+```{r}
+all_null = sim_mus %>%
+  group_by(mu) %>%
+  summarize(
+    all = mean(estimate)
+  )
+
+rejected_null = sim_mus %>%
+  mutate(decision = case_when(
+    p.value < 0.05 ~ "rejected", 
+    p.value >= 0.95 ~ "fail to reject"
+  )) %>%
+  filter(decision == "rejected") %>%
+  group_by(mu) %>%
+  summarize(
+    rejected = mean(estimate)
+  )
 ```
 
+##### (4) step 2 of making plot 2 
+```{r}
+plot_2 = 
+  left_join(all_null, rejected_null, by = "mu") %>%
+  pivot_longer(
+    all:rejected, 
+    names_to = "types", 
+    values_to = "average_mu_estimate"
+  ) %>%
+  ggplot(aes(x = mu, y = average_mu_estimate, color = types)) + 
+  geom_point() +
+  geom_smooth() +
+  labs(title = "Comparison between the true value of mu and the average of estimate value of mu", x = "True value of mu", y = "average estimate value of mu")
+
+plot_2
+```
+Comment: The sample average of mu across tests for which the null is rejected is greater than the true value of mu until the true value of mu reached 4. This makes sense because as the effect size increases, the power of the test increases as well, and when the effect size is around 4, the power of the test also reaches its maximum value of 1. 
