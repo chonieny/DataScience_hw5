@@ -66,7 +66,6 @@ sim_ttest(0)
 sim_mu0 = rerun(5000, sim_ttest(0)) %>%
   bind_rows()
 
-sim_mu0
 ```
 
 ### Simulations 5000 times for mu = 1,2,3,4,5,6
@@ -78,12 +77,32 @@ sim_mus = tibble(mu = c(1,2,3,4,5,6)) %>%
   select(mu, estimate) %>%
   unnest(estimate)
   
-
-sim_mus
 ```
 
 ### Make plots
+##### (1) step 1 of making plot 1
 ```{r}
+test_power = 
+  sim_mus %>%
+  mutate(decision = case_when(
+    p.value < 0.05 ~ "rejected", 
+    p.value >= 0.05 ~ "fail to reject"
+  )) %>%
+  group_by(mu) %>%
+  summarize(
+    total_decision = n(), 
+    total_reject = sum(decision == "rejected")
+  ) %>%
+  mutate(
+    prop_tests = map2(.x = total_reject, .y = total_decision, ~prop.test(x = .x, n = .y)), 
+    tidy_tests = map(.x = prop_tests, ~broom::tidy(.x))
+  ) %>%
+  select(mu, total_decision, total_reject, tidy_tests) %>%
+  unnest(tidy_tests) %>%
+  select(mu, estimate, conf.low, conf.high) %>%
+  rename(power = estimate)
 
+test_power
 ```
+
 
