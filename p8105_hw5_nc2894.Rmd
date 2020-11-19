@@ -105,4 +105,11 @@ test_power =
 test_power
 ```
 
+##### (2) step 2 of making plot 1
+```{r}
+test_power %>% ggplot(aes(x = mu, y = power)) +
+  geom_point() +
+  geom_smooth() + 
+  labs()
+```
 
