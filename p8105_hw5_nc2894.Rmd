@@ -74,9 +74,9 @@ sim_mu0
 sim_mus = tibble(mu = c(1,2,3,4,5,6)) %>%
   mutate( 
     output = map(.x = mu, ~rerun(5000, sim_ttest(.x))), 
-    estimate= map(output_list, bind_rows)) %>%
-  select(mu, estimate_df) %>%
-  unnest(estimate_df)
+    estimate= map(output, bind_rows)) %>%
+  select(mu, estimate) %>%
+  unnest(estimate)
   
 
 sim_mus
